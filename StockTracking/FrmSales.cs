@@ -10,21 +10,21 @@ using System.Windows.Forms;
 
 namespace StockTracking
 {
-    public partial class FrmCategory : Form
+    public partial class FrmSales : Form
     {
-        public FrmCategory()
+        public FrmSales()
         {
             InitializeComponent();
+        }
+
+        private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            e.Handled = General.isNumber(e);
         }
 
         private void btnClose_Click(object sender, EventArgs e)
         {
             this.Close();
-        }
-
-        private void FrmCategory_Load(object sender, EventArgs e)
-        {
-
         }
     }
 }

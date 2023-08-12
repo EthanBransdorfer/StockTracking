@@ -10,9 +10,9 @@ using System.Windows.Forms;
 
 namespace StockTracking
 {
-    public partial class FrmCategory : Form
+    public partial class FrmAddStock : Form
     {
-        public FrmCategory()
+        public FrmAddStock()
         {
             InitializeComponent();
         }
@@ -20,11 +20,6 @@ namespace StockTracking
         private void btnClose_Click(object sender, EventArgs e)
         {
             this.Close();
-        }
-
-        private void FrmCategory_Load(object sender, EventArgs e)
-        {
-
         }
     }
 }
