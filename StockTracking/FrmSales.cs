@@ -139,7 +139,7 @@ namespace StockTracking
                     {
                         MessageBox.Show("Attempting to sell more product than we have.");
                     }
-                    else if (detail.SalesAmount == 0)
+                    else if (Convert.ToInt32(txtSalesAmount.Text) == 0)
                     {
                         MessageBox.Show("Please provide a number greater than zero.");
                     }

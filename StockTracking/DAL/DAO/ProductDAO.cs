@@ -12,12 +12,54 @@ namespace StockTracking.DAL.DAO
     {
         public bool Delete(PRODUCT entity)
         {
-            throw new NotImplementedException();
+            try
+            {
+                if(entity.ID != 0)
+                {
+                    PRODUCT product = db.PRODUCTs.First(x => x.ID == entity.ID);
+                    product.isDeleted = true;
+                    product.DeletedDate = DateTime.Today;
+                    db.SaveChanges();
+                }
+                else if(entity.CategoryID != 0)
+                {
+                    List<PRODUCT> list = db.PRODUCTs.Where(x => x.CategoryID == entity.CategoryID).ToList();
+                    foreach (var item in list)
+                    {
+                        item.isDeleted = true;
+                        item.DeletedDate = DateTime.Today;
+                        List<SALE> sales = db.SALEs.Where(x => x.ProductID == item.ID).ToList();
+                        foreach (var s in sales)
+                        {
+                            s.isDeleted = true;
+                            s.DeletedDate = DateTime.Today;
+                        }
+                        db.SaveChanges();
+                    }
+                    db.SaveChanges();
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         public bool GetBack(int ID)
         {
-            throw new NotImplementedException();
+            try
+            {
+                PRODUCT product = db.PRODUCTs.First(x => x.ID == ID);
+                product.isDeleted = false;
+                product.DeletedDate = null;
+                db.SaveChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         public bool Insert(PRODUCT entity)
@@ -39,7 +81,7 @@ namespace StockTracking.DAL.DAO
             try
             {
                 List<ProductDetailDTO> product = new List<ProductDetailDTO>();
-                var list = (from p in db.PRODUCTs
+                var list = (from p in db.PRODUCTs.Where(x => x.isDeleted == false)
                             join c in db.CATEGORies on p.CategoryID equals c.ID
                             select new
                             {
@@ -59,6 +101,42 @@ namespace StockTracking.DAL.DAO
                     dto.Price = item.price;
                     dto.ProductID = item.productID;
                     dto.CategoryID = item.categoryID;
+                    product.Add(dto);
+                }
+                return product;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        public List<ProductDetailDTO> Select(bool isDeleted)
+        {
+            try
+            {
+                List<ProductDetailDTO> product = new List<ProductDetailDTO>();
+                var list = (from p in db.PRODUCTs.Where(x => x.isDeleted == isDeleted)
+                            join c in db.CATEGORies on p.CategoryID equals c.ID
+                            select new
+                            {
+                                productName = p.ProductName,
+                                categoryName = c.CategoryName,
+                                stockAmount = p.StockAmount,
+                                price = p.Price,
+                                productID = p.ID,
+                                categoryID = c.ID,
+                                categoryisDeleted = c.isDeleted
+                            }).OrderBy(x => x.productName).ToList();
+                foreach (var item in list)
+                {
+                    ProductDetailDTO dto = new ProductDetailDTO();
+                    dto.ProductName = item.productName;
+                    dto.CategoryName = item.categoryName;
+                    dto.StockAmount = item.stockAmount;
+                    dto.Price = item.price;
+                    dto.ProductID = item.productID;
+                    dto.CategoryID = item.categoryID;
+                    dto.isCategoryDeleted = item.categoryisDeleted;
                     product.Add(dto);
                 }
                 return product;

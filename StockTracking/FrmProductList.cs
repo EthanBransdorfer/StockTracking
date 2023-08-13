@@ -26,7 +26,26 @@ namespace StockTracking
 
         private void btnDelete_Click(object sender, EventArgs e)
         {
-
+            if (detail.ProductID == 0)
+            {
+                MessageBox.Show("Please select a product from the table");
+            }
+            else
+            {
+                DialogResult result = MessageBox.Show("Are you sure?", "Warning!!", MessageBoxButtons.YesNo);
+                if (result == DialogResult.Yes)
+                {
+                    if (bll.Delete(detail))
+                    {
+                        MessageBox.Show("Product was deleted");
+                        bll = new ProductBLL();
+                        dto = bll.Select();
+                        dataGridView1.DataSource = dto.Products;
+                        cmbCategory.DataSource = dto.Categories;
+                        CleanFilters();
+                    }
+                }
+            }
         }
 
         private void btnAdd_Click(object sender, EventArgs e)
@@ -96,6 +115,7 @@ namespace StockTracking
             dataGridView1.Columns[3].HeaderText = "Price";
             dataGridView1.Columns[4].Visible = false;
             dataGridView1.Columns[5].Visible = false;
+            dataGridView1.Columns[6].Visible = false;
         }
 
         private void btnSearch_Click(object sender, EventArgs e)

@@ -64,6 +64,9 @@ namespace StockTracking
             dataGridView1.Columns[5].Visible = false;
             dataGridView1.Columns[9].Visible = false;
             dataGridView1.Columns[10].Visible = false;
+            dataGridView1.Columns[11].Visible = false;
+            dataGridView1.Columns[12].Visible = false;
+            dataGridView1.Columns[13].Visible = false;
             cmbCategory.DataSource = dto.Categories;
             cmbCategory.DisplayMember = "CategoryName";
             cmbCategory.SelectedIndex = -1;
@@ -163,6 +166,7 @@ namespace StockTracking
             detail.ProductName = dataGridView1.Rows[e.RowIndex].Cells[1].Value.ToString();
             detail.Price = Convert.ToInt32(dataGridView1.Rows[e.RowIndex].Cells[7].Value);
             detail.SalesAmount = Convert.ToInt32(dataGridView1.Rows[e.RowIndex].Cells[6].Value);
+            detail.StockAmount = Convert.ToInt32(dataGridView1.Rows[e.RowIndex].Cells[9].Value);
         }
 
         private void btnUpdate_Click(object sender, EventArgs e)
@@ -184,6 +188,29 @@ namespace StockTracking
                 dto = bll.Select();
                 dataGridView1.DataSource = dto.Sales;
                 CleanFilters();
+            }
+        }
+
+        private void btnDelete_Click(object sender, EventArgs e)
+        {
+            if (detail.SalesID == 0)
+            {
+                MessageBox.Show("Please select a sale from the table"); 
+            }
+            else
+            {
+                DialogResult result = MessageBox.Show("Are you sure?", "Warning!!", MessageBoxButtons.YesNo);
+                if (result == DialogResult.Yes)
+                {
+                    if (bll.Delete(detail))
+                    {
+                        MessageBox.Show("Sale was deleted");
+                        bll = new SalesBLL();
+                        dto = bll.Select();
+                        dataGridView1.DataSource = dto.Sales;
+                        CleanFilters();
+                    }
+                }
             }
         }
     }
