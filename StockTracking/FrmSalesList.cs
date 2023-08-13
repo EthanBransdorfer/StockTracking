@@ -48,6 +48,7 @@ namespace StockTracking
         }
         SalesBLL bll = new SalesBLL();
         SalesDTO dto = new SalesDTO();
+        SalesDetailDTO detail = new SalesDetailDTO();
         private void FrmSalesList_Load(object sender, EventArgs e)
         {
             dto = bll.Select();
@@ -151,6 +152,39 @@ namespace StockTracking
             dpStart.Value = DateTime.Today;
             dpEnd.Value = DateTime.Today;
             dataGridView1.DataSource = dto.Sales;
+        }
+
+        private void dataGridView1_RowEnter(object sender, DataGridViewCellEventArgs e)
+        {
+            detail = new SalesDetailDTO();
+            detail.SalesID = Convert.ToInt32(dataGridView1.Rows[e.RowIndex].Cells[10].Value);
+            detail.ProductID = Convert.ToInt32(dataGridView1.Rows[e.RowIndex].Cells[4].Value);
+            detail.CustomerName = dataGridView1.Rows[e.RowIndex].Cells[0].Value.ToString();
+            detail.ProductName = dataGridView1.Rows[e.RowIndex].Cells[1].Value.ToString();
+            detail.Price = Convert.ToInt32(dataGridView1.Rows[e.RowIndex].Cells[7].Value);
+            detail.SalesAmount = Convert.ToInt32(dataGridView1.Rows[e.RowIndex].Cells[6].Value);
+        }
+
+        private void btnUpdate_Click(object sender, EventArgs e)
+        {
+            if (detail.SalesID == 0)
+            {
+                MessageBox.Show("Please select a sale from the table.");
+            }
+            else
+            {
+                FrmSales frm = new FrmSales();
+                frm.detail = detail;
+                frm.isUpdate = true;
+                frm.dto = dto;
+                this.Hide();
+                frm.ShowDialog();
+                this.Visible = true;
+                bll = new SalesBLL();
+                dto = bll.Select();
+                dataGridView1.DataSource = dto.Sales;
+                CleanFilters();
+            }
         }
     }
 }

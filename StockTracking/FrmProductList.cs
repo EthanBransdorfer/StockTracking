@@ -43,7 +43,25 @@ namespace StockTracking
 
         private void btnUpdate_Click(object sender, EventArgs e)
         {
+            if (detail.ProductID == 0)
+            {
+                MessageBox.Show("Please select a product from the table");
+            }
+            else
+            {
+                FrmProduct frm = new FrmProduct();
+                frm.isUpdate = true;
+                frm.detail = detail;
+                frm.dto = dto;
+                this.Hide();
+                frm.ShowDialog();
+                this.Visible = true;
+                bll = new ProductBLL();
+                dto = bll.Select();
+                dataGridView1.DataSource = dto.Products;
+                CleanFilters();
 
+            }
         }
 
         private void radioButton1_CheckedChanged(object sender, EventArgs e)
@@ -151,6 +169,17 @@ namespace StockTracking
         private void btnClear_Click(object sender, EventArgs e)
         {
             CleanFilters();
+        }
+
+        ProductDetailDTO detail = new ProductDetailDTO();
+        private void dataGridView1_RowEnter(object sender, DataGridViewCellEventArgs e)
+        {
+            detail = new ProductDetailDTO();
+            detail.ProductID = Convert.ToInt32(dataGridView1.Rows[e.RowIndex].Cells[4].Value);
+            detail.CategoryID = Convert.ToInt32(dataGridView1.Rows[e.RowIndex].Cells[5].Value);
+            detail.Price = Convert.ToInt32(dataGridView1.Rows[e.RowIndex].Cells[3].Value);
+            detail.ProductName = dataGridView1.Rows[e.RowIndex].Cells[0].Value.ToString();
+          
         }
     }
 }

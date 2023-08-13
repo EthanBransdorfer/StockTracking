@@ -30,26 +30,43 @@ namespace StockTracking
             this.Close();
         }
         public SalesDTO dto = new SalesDTO();
+        public SalesDetailDTO detail = new SalesDetailDTO();
+        public bool isUpdate = false;
         private void FrmSales_Load(object sender, EventArgs e)
         {
             cmbCategory.DataSource = dto.Categories;
             cmbCategory.DisplayMember = "CategoryName";
             cmbCategory.ValueMember = "ID";
             cmbCategory.SelectedIndex = -1;
-            GridCategory.DataSource = dto.Products;
-            GridCategory.Columns[0].HeaderText = "Product Name";
-            GridCategory.Columns[1].HeaderText = "Category Name";
-            GridCategory.Columns[2].HeaderText = "Stock Amount";
-            GridCategory.Columns[3].HeaderText = "Price";
-            GridCategory.Columns[4].Visible = false;
-            GridCategory.Columns[5].Visible = false;
-
-            GridCustomer.DataSource = dto.Customers;
-            GridCustomer.Columns[0].Visible = false;
-            GridCustomer.Columns[1].HeaderText = "Customer Name";
-            if (dto.Categories.Count > 0)
+            if (!isUpdate)
             {
-                combofull = true;
+                GridCategory.DataSource = dto.Products;
+                GridCategory.Columns[0].HeaderText = "Product Name";
+                GridCategory.Columns[1].HeaderText = "Category Name";
+                GridCategory.Columns[2].HeaderText = "Stock Amount";
+                GridCategory.Columns[3].HeaderText = "Price";
+                GridCategory.Columns[4].Visible = false;
+                GridCategory.Columns[5].Visible = false;
+
+                GridCustomer.DataSource = dto.Customers;
+                GridCustomer.Columns[0].Visible = false;
+                GridCustomer.Columns[1].HeaderText = "Customer Name";
+                if (dto.Categories.Count > 0)
+                {
+                    combofull = true;
+                }
+            }
+            else
+            {
+                panel1.Hide();
+                txtCustomerName.Text = detail.CustomerName;
+                txtProductName.Text = detail.ProductName;
+                txtPrice.Text = detail.Price.ToString();
+                txtSalesAmount.Text = detail.SalesAmount.ToString();
+                ProductDetailDTO product = dto.Products.First(x => x.ProductID == detail.ProductID);
+                detail.StockAmount = product.StockAmount;
+                txtStock.Text = detail.StockAmount.ToString();
+
             }
         }
         bool combofull = false;
@@ -79,7 +96,7 @@ namespace StockTracking
                 txtCustomerName.Clear();
             }
         }
-        SalesDetailDTO detail = new SalesDetailDTO();
+        
         SalesBLL bll = new SalesBLL();
         private void GridCategory_RowEnter(object sender, DataGridViewCellEventArgs e)
         {
@@ -102,36 +119,75 @@ namespace StockTracking
 
         private void btnSave_Click(object sender, EventArgs e)
         {
-            if (detail.ProductID == 0)
+            if (txtSalesAmount.Text.Trim() == "")
             {
-                MessageBox.Show("Please select a product from the top table.");
-            }
-            else if (detail.CustomerID == 0) 
-            {
-                MessageBox.Show("Please select a customer from the bottom table.");
-            }
-            else if (detail.StockAmount < Convert.ToInt32(txtSalesAmount.Text))
-            {
-                MessageBox.Show("Attempting to sell more product than we have.");
+                MessageBox.Show("Please provide a sales amount");
             }
             else
             {
-                detail.SalesAmount = Convert.ToInt32(txtSalesAmount.Text);
-                detail.SalesDate = DateTime.Today;
-                if (bll.Insert(detail))
+                if (!isUpdate) 
                 {
-                    MessageBox.Show("Sale was added succesfully");
-                    bll = new SalesBLL();
-                    dto = bll.Select();
-                    GridCategory.DataSource = dto.Products;
-                    GridCustomer.DataSource = dto.Customers;
-                    combofull = false;
-                    cmbCategory.DataSource = dto.Categories;
-                    if (dto.Products.Count > 0)
+                    if (detail.ProductID == 0)
                     {
-                        combofull = true;
+                        MessageBox.Show("Please select a product from the top table.");
                     }
-                    txtSalesAmount.Clear();
+                    else if (detail.CustomerID == 0)
+                    {
+                        MessageBox.Show("Please select a customer from the bottom table.");
+                    }
+                    else if (detail.StockAmount < Convert.ToInt32(txtSalesAmount.Text))
+                    {
+                        MessageBox.Show("Attempting to sell more product than we have.");
+                    }
+                    else if (detail.SalesAmount == 0)
+                    {
+                        MessageBox.Show("Please provide a number greater than zero.");
+                    }
+                    else
+                    {
+                        detail.SalesAmount = Convert.ToInt32(txtSalesAmount.Text);
+                        detail.SalesDate = DateTime.Today;
+                        if (bll.Insert(detail))
+                        {
+                            MessageBox.Show("Sale was added succesfully");
+                            bll = new SalesBLL();
+                            dto = bll.Select();
+                            GridCategory.DataSource = dto.Products;
+                            GridCustomer.DataSource = dto.Customers;
+                            combofull = false;
+                            cmbCategory.DataSource = dto.Categories;
+                            if (dto.Products.Count > 0)
+                            {
+                                combofull = true;
+                            }
+                            txtSalesAmount.Clear();
+                        }
+                    }
+                }
+                else //Update
+                {
+                    if (detail.SalesAmount == Convert.ToInt32(txtSalesAmount.Text)) 
+                    {
+                        MessageBox.Show("There is no change");
+                    }
+                    else
+                    {
+                        int temp = detail.StockAmount + detail.SalesAmount;
+                        if (temp < Convert.ToInt32(txtSalesAmount.Text))
+                        {
+                            MessageBox.Show("You have not enough product for sale");
+                        }
+                        else
+                        {
+                            detail.SalesAmount = Convert.ToInt32(txtSalesAmount.Text);
+                            detail.StockAmount = temp - detail.SalesAmount;
+                            if (bll.Update(detail)) 
+                            {
+                                MessageBox.Show("Sales was updated.");
+                                this.Close();
+                            }
+                        }
+                    }
                 }
             }
         }

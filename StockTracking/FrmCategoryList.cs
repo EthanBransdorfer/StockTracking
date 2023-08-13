@@ -52,5 +52,32 @@ namespace StockTracking
             dataGridView1.DataSource = list;   
 
         }
+
+        private void btnUpdate_Click(object sender, EventArgs e)
+        {
+            if (detail.ID == 0)
+            {
+                MessageBox.Show("Select a category");
+            }
+            else
+            {
+                FrmCategory frm = new FrmCategory();
+                frm.detail = detail;
+                frm.isUpdate = true;
+                this.Hide();
+                frm.ShowDialog();
+                this.Visible = true;
+                bll = new CategoryBLL();
+                dto = bll.Select();
+                dataGridView1.DataSource = dto.Categories;
+            }
+        }
+        CategoryDetailDTO detail = new CategoryDetailDTO();
+        private void dataGridView1_RowEnter(object sender, DataGridViewCellEventArgs e)
+        {
+            detail = new CategoryDetailDTO();
+            detail.ID = Convert.ToInt32(dataGridView1.Rows[e.RowIndex].Cells[0].Value);
+            detail.CategoryName = dataGridView1.Rows[e.RowIndex].Cells[1].Value.ToString();
+        }
     }
 }
